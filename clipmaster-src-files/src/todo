@@ -1,0 +1,83 @@
+TO-DO:
+ thumbnail functionality
+ add a clip-list in zustand, append to list on each import
+ preview video and edit video in the same position (we should only see one at a time)
+when they are added to a timeline, their start and end time is determined based on their position in the timeline
+when dragged, we modify start and end time.
+Go to points 2 and 3.
+
+FOR TRIMMING: Simply modify the start and end times. 
+For spltiting:
+
+First clip: startTime = originalStartTime, endTime = splitTime
+Second clip: startTime = splitTime, endTime = originalEndTime
+
+The original clip is removed.
+The new clips are inserted at the split point.
+
+Video playback:
+
+The video element itself will always try to play the full video, but you control the playback using video.currentTime.
+By modifying the currentTime based on the start and end times of the clips, you ensure the video only renders and plays the desired part.
+Stopping playback happens when currentTime exceeds endTime, and the video is paused or skipped to the next clip.
+
+
+
+1. Timeline Management:
+Each clip in the timeline will have:
+
+Start Time: The time when the clip starts playing.
+End Time: The time when the clip stops playing.
+The clips are arranged in a sequence on the timeline.
+
+2. Playback Logic:
+As the video plays and the currentTime updates, the system checks which clip should be playing based on the startTime and endTime for each clip.
+3. When the video reaches the end of Clip 1:
+If the currentTime exceeds the endTime of Clip 1, it checks for the next clip in the timeline.
+It looks for the next clip that starts after the endTime of Clip 1 (i.e., the clip whose startTime is greater than the current currentTime).
+The new clip starts playing as soon as the video reaches its startTime.
+Example:
+Let's say you have the following timeline:
+
+    Clip	Start Time	End Time	Duration
+    Clip 1	0s	5s	5 seconds
+    Clip 2	5s	10s	5 seconds
+    Clip 3	10s	15s	5 seconds
+
+Playback Flow:
+    At currentTime = 0s, Clip 1 is playing (starts at 0s, ends at 5s).
+    At currentTime = 5s, Clip 1 ends. The system looks for the next clip with a startTime greater than 5s.
+    It finds that Clip 2 starts at 5s, so it starts playing Clip 2.
+    At currentTime = 10s, Clip 2 ends. The system looks for the next clip with a startTime greater than 10s.
+    It finds that Clip 3 starts at 10s, so it starts playing Clip 3.
+
+4. Handling Transitions and Effects:
+When a new clip starts, you can handle transitions (e.g., fading in, transitioning between clips) or effects applied to the new clip.
+If a clip is trimmed, it only affects its start and end times, and the system will adjust the playback accordingly.
+5. Canvas Rendering:
+For each clip that's playing, the system will continuously render the video on the canvas by checking the currentTime and drawing the appropriate frame.
+As soon as the currentTime crosses the endTime of the current clip, the system will move to the next clip in the timeline, checking its startTime and rendering it accordingly.
+Summary:
+Yes, as the video plays, when one clip finishes, the system checks for the next clip that is within the range of the currentTime.
+It continues this process until all clips are played, and it can loop back or stop depending on your app's behavior (e.g., if there's a "loop" feature or an "end" feature).
+
+6. Key Points About Trimming:
+Modifying the start and end times of a clip changes the time window of the video that is considered as part of that clip, but it doesn’t alter the actual video file.
+The video file remains intact; you’re just defining which portion of the video should be visible or played back in your video editor.
+The actual trimming (removal of video content) would require more advanced operations like creating a new video file with the trimmed content, but for the purposes of a video editor that works with playback and previewing, trimming generally means adjusting the playback range.
+How It Works Conceptually:
+Let’s say you have a clip that starts at 0 seconds and ends at 10 seconds:
+
+Original Clip (before trimming):
+Start: 0s
+End: 10s
+Duration: 10s
+Clip contains frames from 0s to 10s.
+Now, let’s say you want to trim this clip to remove the first 3 seconds, making the clip start from 3 seconds instead of 0 seconds.
+
+Trimmed Clip:
+Start: 3s
+End: 10s
+Duration: 7s
+Clip contains frames from 3s to 10s.
+What Happens:

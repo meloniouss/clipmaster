@@ -7,33 +7,25 @@ type VideoFile = {
     url: string;
   };
 interface VideoState {
+    clipList: VideoFile[] | [];
     mainFile: VideoFile | null;
-    proxyFile: VideoFile | null;
     importFile: (file: File) => void;
-    setProxyFile: (file: File) => void;
+
 }
 export const useStore = create<VideoState>((set) => ({
     mainFile: null,
-    proxyFile: null,
-  
+    clipList: [],
     importFile: (file: File) =>
-      set(() => ({
-        mainFile: {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: URL.createObjectURL(file), 
-        },
-      })),
-      
-    setProxyFile: (file: File) =>
-      set(() => ({
-        proxyFile: {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: URL.createObjectURL(file),
-        },
+      set((state) => ({
+        clipList: [
+          ...(state.clipList || []), // takes clipList of the state, or empty if it's empty, and adds the file
+          {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            url: URL.createObjectURL(file), 
+          },
+        ],
       })),
   }));
 
