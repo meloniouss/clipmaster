@@ -1,7 +1,7 @@
 TO-DO:
- thumbnail functionality
- add a clip-list in zustand, append to list on each import
- preview video and edit video in the same position (we should only see one at a time)
+ thumbnail functionality -- DONE
+ add a clip-list in zustand, append to list on each import -- DONE
+ preview video and edit video in the same position (we should only see one at a time) 
 when they are added to a timeline, their start and end time is determined based on their position in the timeline
 when dragged, we modify start and end time.
 Go to points 2 and 3.

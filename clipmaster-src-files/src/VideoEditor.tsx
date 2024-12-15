@@ -47,17 +47,18 @@ const VideoEditor: React.FC = () => {
     <div>
       <video
         ref={videoRef}
-        width="640"
-        height="380"
+        width="70%"
+        height="70%"
         controls
       >
         {clipList[0] && !isPreviewMode && <source src={clipList[0].url} type={clipList[0].type} />}
         Your browser does not support the video element.
       </video>
+      <br></br>
       <button onClick={togglePreviewMode}>
         {isPreviewMode ? "Switch to Video Mode" : "Switch to Preview Mode"}
       </button>
-      {isPreviewMode && <canvas ref={canvasRef} width="640" height="380"></canvas>}
+      {isPreviewMode && <canvas ref={canvasRef} width="70%" height="70%"></canvas>}
     </div>
   );
 };
