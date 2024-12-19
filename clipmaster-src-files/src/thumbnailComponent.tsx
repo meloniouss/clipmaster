@@ -23,7 +23,7 @@ export default function ThumbnailComponent (){
             }
         }, clipList) ;
     })
-  
+    return(<div>we gotta start displaying the thumbnails here soon</div>)
   
     
 }
