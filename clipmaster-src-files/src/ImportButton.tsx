@@ -19,6 +19,7 @@ return(
    <Button
        variant="contained"
       component="label"
+      style={{marginBottom: '20px'}}
       >
        Upload Video
       <input

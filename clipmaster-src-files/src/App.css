@@ -71,3 +71,12 @@
   width: 5px;
   cursor: ew-resize; 
 }
+
+div {
+  overflow: scroll; 
+  scrollbar-width: none; 
+}
+
+div::-webkit-scrollbar {
+  display: none; 
+}
