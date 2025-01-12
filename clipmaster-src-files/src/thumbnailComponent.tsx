@@ -1,53 +1,110 @@
-import { useEffect, useRef, useState } from 'react';
-import './zustandStore'
+import { useEffect, useState } from 'react';
+import './zustandStore';
 import { useStore } from './zustandStore';
+import { useDrag } from 'react-dnd';
+import { ItemTypes } from './ItemTypes';
 
-export default function ThumbnailComponent (){
-    const {clipList} = useStore();
-    const[thumbnailList, setThumbnailList] = useState<string[]>([]);
-    //we're gonna use useEffect to set ThumbnailList to the new list whenever clipList changes
-    useEffect(() => {
-        const newThumbnails: string[] = [];
+interface DropResult {
+  name: string;
+}
 
-        clipList.forEach((clip) => {
-            const videoElement = document.createElement('video');
-            videoElement.src = clip.url;
-            videoElement.crossOrigin = 'anonymous'; //for cors
-            videoElement.currentTime = 1;
-            
-            videoElement.onloadeddata = () => { //when the video loads, we capture the first second of the video and use it as a thumbnail
-                const canvas = document.createElement('canvas');
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
-                const ctx = canvas.getContext('2d');
-                if (ctx){ ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                    newThumbnails.push(canvas.toDataURL('image/png')); // Collect new thumbnails
-                    if (newThumbnails.length === clipList.length) {
-                        setThumbnailList(newThumbnails);} //this is necessary because otherwise it causes a race condition and it starts messing up the updating 
-                }
-            }
-        });
-    }, [clipList]);
-    return (
-        (thumbnailList as string[]).length > 0 && (
-          <div
-            style={{display: 'flex', flexDirection: "column", 
-            justifyContent: "center",
-            alignItems: "center",
-            }}>
-            {thumbnailList.map((thumbnail, index) => (
-              <div style={{display: 'flex', flexDirection: "column", 
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: '20px',}}>
-                <img key={index} src={thumbnail} alt={`Thumbnail ${index}`}  style={{ width: '300px', height: 'auto', objectFit: 'cover' }}/>
-                {clipList[index].name}
-              </div>
-            ))}
-          </div>
-        )
-      );
-        
-  
-    
+interface ThumbnailItemProps {
+  thumbnail: string;
+  index: number;
+  clip: { name: string; url: string }; 
+}
+
+function ThumbnailItem({ thumbnail, index, clip }: ThumbnailItemProps) {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: ItemTypes.THUMBNAIL,
+    item: { name: clip.name },
+    end: (item, monitor) => {
+      const dropResult = monitor.getDropResult<DropResult>();
+      if (item && dropResult) {
+        alert(`You dropped ${item.name} into ${dropResult.name}!`);
+      }
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+
+  const opacity = isDragging ? 0.4 : 1;
+
+  return (
+    <div
+      ref={drag} 
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: '20px',
+        opacity,
+      }}
+    >
+      <img
+        src={thumbnail}
+        alt={`Thumbnail ${index}`}
+        style={{
+          width: '300px',
+          height: 'auto',
+          objectFit: 'cover',
+        }}
+      />
+      {clip.name}
+    </div>
+  );
+}
+
+export default function ThumbnailComponent() {
+  const { clipList } = useStore();
+  const [thumbnailList, setThumbnailList] = useState<string[]>([]);
+
+  useEffect(() => {
+    const newThumbnails: string[] = [];
+
+    clipList.forEach((clip) => {
+      const videoElement = document.createElement('video');
+      videoElement.src = clip.url;
+      videoElement.crossOrigin = 'anonymous'; 
+      videoElement.currentTime = 1;
+
+      videoElement.onloadeddata = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+          newThumbnails.push(canvas.toDataURL('image/png')); 
+          if (newThumbnails.length === clipList.length) {
+            setThumbnailList(newThumbnails);
+          }
+        }
+      };
+    });
+  }, [clipList]);
+
+  return (
+    (thumbnailList as string[]).length > 0 && (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        {thumbnailList.map((thumbnail, index) => (
+          <ThumbnailItem
+            key={index}
+            thumbnail={thumbnail}
+            index={index}
+            clip={clipList[index]}
+          />
+        ))}
+      </div>
+    )
+  );
 }

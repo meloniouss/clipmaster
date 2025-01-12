@@ -2,12 +2,24 @@ import { useEffect, useRef, useState } from "react";
 import './zustandStore';
 import { useStore } from './zustandStore';
 
+import { useDrop } from 'react-dnd'
+import { ItemTypes } from './ItemTypes'
+
 const VideoEditor: React.FC = () => {
   const { clipList } = useStore();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false); 
   const [videoWidth, setVideoWidth] = useState<number | null>(null);
+
+  const [{ canDrop, isOver }, drop] = useDrop(() => ({
+    accept: ItemTypes.THUMBNAIL,
+    drop: () => ({ name: 'Editor' }),
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+    }),
+  }))
 
   useEffect(() => {
     const video = videoRef.current;
@@ -65,13 +77,23 @@ const VideoEditor: React.FC = () => {
     setIsPreviewMode((prev) => !prev);
   };
 
+  const isActive = canDrop && isOver
+  if (isActive) {
+    console.log('is active')
+  } else if (canDrop) {
+    console.log('currently hovering')
+  }
+
   return (
-    <div style={{
+    <div 
+      ref={drop}
+      style={{
       width:  `${videoWidth}px`, 
       display: "flex",
       flexDirection: "column", 
       justifyContent: "center",
       alignItems: "center", 
+
     }}>
     {clipList[0] && ( //only show if a clip has been imported already
       <video 

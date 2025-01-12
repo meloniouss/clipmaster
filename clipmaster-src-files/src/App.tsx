@@ -4,9 +4,12 @@ import './App.css'
 import VideoEditor from './VideoEditor'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import ThumbnailComponent from './thumbnailComponent'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 function App() {
   return (
+    <DndProvider backend={HTML5Backend}>
     <div className="app-container">
     <PanelGroup direction="vertical">
       <Panel minSize={33}>
@@ -46,6 +49,7 @@ function App() {
       </Panel>
     </PanelGroup>
   </div>
+  </DndProvider>
   )
 }
 

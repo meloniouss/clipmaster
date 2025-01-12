@@ -12,11 +12,14 @@ interface VideoState {
     importFile: (file: File) => void;
 
 }
+interface State {
+  clipList: VideoFile[] | [];
+}
 export const useStore = create<VideoState>((set) => ({
     mainFile: null,
     clipList: [],
     importFile: (file: File) =>
-      set((state) => ({
+      set((state: State) => ({
         clipList: [
           ...(state.clipList || []), // takes clipList of the state, or empty if it's empty, and adds the file
           {
