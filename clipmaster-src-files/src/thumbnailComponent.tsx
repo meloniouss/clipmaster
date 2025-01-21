@@ -21,7 +21,7 @@ function ThumbnailItem({ thumbnail, index, clip }: ThumbnailItemProps) {
     end: (item, monitor) => {
       const dropResult = monitor.getDropResult<DropResult>();
       if (item && dropResult) {
-        alert(`You dropped ${item.name} into ${dropResult.name}!`);
+        alert(`Work in progress! I've yet to implement the timeline as of 01-21-25`);
       }
     },
     collect: (monitor) => ({

@@ -6,6 +6,8 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import ThumbnailComponent from './thumbnailComponent'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import Timeline from './Timeline'
+
 
 function App() {
   return (
@@ -45,7 +47,7 @@ function App() {
       </Panel>
       <PanelResizeHandle className="resize-handle" />
       <Panel className="panel" minSize={20} defaultSize={28}>
-        VIDEO EDITOR TIMELINE
+        <Timeline />
       </Panel>
     </PanelGroup>
   </div>
