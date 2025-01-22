@@ -65,6 +65,7 @@ export default function ThumbnailComponent() {
     const newThumbnails: string[] = [];
 
     clipList.forEach((clip) => {
+      //console.log(clip)
       const videoElement = document.createElement('video');
       videoElement.src = clip.url;
       videoElement.crossOrigin = 'anonymous'; 

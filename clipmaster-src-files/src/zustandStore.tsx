@@ -28,17 +28,18 @@ export const useStore = create<VideoState>((set, get) => ({
   timelineClipList: [], 
 
   importFile: (file: File) =>
-    set((state) => ({
-      clipList: [
-        ...(state.clipList || []),
-        {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: URL.createObjectURL(file),
-        },
-      ],
-    })),
+    set((state) => {
+      const newClip = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: URL.createObjectURL(file),
+      };
+      return {
+        clipList: [...state.clipList, newClip], // Add new clip to the list
+      };
+    }),
+
 
   addToTimeline: (clip: VideoFile) =>
     set((state) => ({
