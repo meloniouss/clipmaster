@@ -12,6 +12,7 @@ import { useDrop } from 'react-dnd'
 import { ItemTypes } from './ItemTypes'
 import { useStore } from "./zustandStore";
 import { useEffect, useState } from "react";
+import React from "react";
 export default function Timeline() {
     // timeline/time scale
     // we can make the time stamps be dynamic based non video lengths
@@ -21,36 +22,62 @@ export default function Timeline() {
         name: string;
     }
     
-    const {addToTimeline,timelineClipList} = useStore();      
+    const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void
+    const vidStore = useStore();
+    const {addToTimeline} = vidStore;      
     const getClipList = useStore.getState;
     const clipList = getClipList().clipList; // used to avoid stale state
+    const timelineClipList = useStore.getState().timelineClipList;
+    const [thumbnailList, setThumbnailList] = useState<string[]>([]); 
+    useEffect(()=>{
+      useStore.getState();
+    }, [timelineClipList]);
+    
+    useEffect(() => {
+      const generateThumbnails = async () => {
+          const newThumbnails: string[] = [];
+          for (const clip of timelineClipList) {
+              const videoElement = document.createElement('video');
+              videoElement.src = clip.url;
+              videoElement.crossOrigin = 'anonymous';
+              videoElement.currentTime = 1;
+  
+              await new Promise<void>((resolve) => {
+                  videoElement.onloadeddata = () => {
+                      const canvas = document.createElement('canvas');
+                      canvas.width = videoElement.videoWidth;
+                      canvas.height = videoElement.videoHeight;
+                      const ctx = canvas.getContext('2d');
+                      if (ctx) {
+                          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                          newThumbnails.push(canvas.toDataURL('image/png'));
+                      }
+                      resolve();
+                  };
+              });
+          }
+          setThumbnailList(newThumbnails);
+      };
+  
+      generateThumbnails();
+  }, [timelineClipList]);
      
       useEffect(() => {     
           console.log('useeffectlist: ' + clipList);
       }, [clipList]);
       useEffect(() => {
-        console.log('Timeline updated with new clip:', timelineClipList);
-      }, [timelineClipList]);
-      const [, forceUpdate] = useState(0);
-
-      useEffect(() => {
-        forceUpdate(n => n + 1);
+        console.log('Timeline updated with new clip:', timelineClipList); //force rerender
       }, [timelineClipList]);
 
-      useEffect(() => {
-        forceUpdate(n => n + 1);
-      }, [clipList]);
-                  
     const [{ canDrop, isOver }, drop] = useDrop(() => ({
         accept: ItemTypes.THUMBNAIL,
         item: { name: String },
         drop: (item:DragItem) => {
             console.log('Item dropped:', item);
             console.log('Drop target name: Timeline');
-            console.log(clipList)
-            console.log('1'+clipList) 
             handleDrop(item);
-            console.log('2'+clipList)
+            console.log("updated");
+            forceUpdate();
             return { name: 'Timeline' };
         },
         collect: (monitor) => ({
@@ -65,31 +92,7 @@ export default function Timeline() {
     } else if (canDrop) {
       console.log('currently hovering')
     }
-      const [thumbnailList, setThumbnailList] = useState<string[]>([]);
-      useEffect(() => {
-        const newThumbnails: string[] = [];
-    
-        timelineClipList.forEach((clip) => {
-          const videoElement = document.createElement('video');
-          videoElement.src = clip.url;
-          videoElement.crossOrigin = 'anonymous'; 
-          videoElement.currentTime = 1;
-    
-          videoElement.onloadeddata = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-              newThumbnails.push(canvas.toDataURL('image/png')); 
-              if (newThumbnails.length === clipList.length) {
-                setThumbnailList(newThumbnails);
-              }
-            }
-          };
-        });
-      }, [timelineClipList]);
+
 
     const handleDrop = (_item: { name: string }) => {
         // find the video in the clipList by name
@@ -100,6 +103,7 @@ export default function Timeline() {
         console.log('Video name: ' +_item.name);
         if (clip) {
             addToTimeline(clip); // we add it to the list of timeline clips, the useeffect will generate a thumbnail for this clip, we just have to fetch it
+            forceUpdate();
         } else {
             console.log('Clip not found in the clip list');
             console.log(updatedClipList)
@@ -136,14 +140,14 @@ export default function Timeline() {
         <div ref={drop} style={{display: "flex", flexDirection: "column", width: "100%", height: "80%"}}> 
                 <div style={{width: "100%", borderBottom: "1px solid black", flex: 1}}></div> 
                 <div style={{width: "100%", borderBottom: "1px solid black", flex: 1}}>
-                {thumbnailList.map((thumbnail, index) => (
+                {thumbnailList.map((thumbnail, index) => ( //issue 
                     <img
                     key={index}
                     src={thumbnail}
-                    alt={`Thumbnail ${index}`}
+                    alt={`Thumbnail`}
                     style={{
-                        width: '150px', // Adjust as needed
-                        height: 'auto',
+                        width: '150px', // 100% /numclips
+                        height: '100%', //
                         objectFit: 'cover',
                     }}
                     />
