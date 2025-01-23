@@ -21,9 +21,10 @@ export default function Timeline() {
         name: string;
     }
     
-    const {addToTimeline, clipList, timelineClipList} = useStore();      
-
-      // Sync the local state with Zustand store whenever clipList changes
+    const {addToTimeline,timelineClipList} = useStore();      
+    const getClipList = useStore.getState;
+    const clipList = getClipList().clipList; // used to avoid stale state
+     
       useEffect(() => {     
           console.log('useeffectlist: ' + clipList);
       }, [clipList]);
@@ -92,15 +93,16 @@ export default function Timeline() {
 
     const handleDrop = (_item: { name: string }) => {
         // find the video in the clipList by name
+        const updatedClipList = getClipList().clipList;
         console.log('clipList BEFORE DROP:');
         console.log(clipList)
-        const clip = clipList.find((clip) => clip.name == _item.name);
+        const clip = updatedClipList.find((clip) => clip.name == _item.name);
         console.log('Video name: ' +_item.name);
         if (clip) {
             addToTimeline(clip); // we add it to the list of timeline clips, the useeffect will generate a thumbnail for this clip, we just have to fetch it
         } else {
             console.log('Clip not found in the clip list');
-            console.log(clipList)
+            console.log(updatedClipList)
         }
     };
 
