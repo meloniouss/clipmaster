@@ -12,7 +12,6 @@ import { useDrop } from 'react-dnd'
 import { ItemTypes } from './ItemTypes'
 import { useStore } from "./zustandStore";
 import { useEffect, useState } from "react";
-import React from "react";
 export default function Timeline() {
     // timeline/time scale
     // we can make the time stamps be dynamic based non video lengths
@@ -22,7 +21,13 @@ export default function Timeline() {
         name: string;
     }
     
-    const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void
+    const [totalClipDuration, setTotalClipDuration] = useState(0);
+    useEffect(() => {
+      setTotalClipDuration(300);
+    }, []); 
+    
+    const intervalTimeDelta = totalClipDuration/12;
+    const intervalCount = 12;
     const vidStore = useStore();
     const {addToTimeline} = vidStore;      
     const getClipList = useStore.getState;
@@ -77,7 +82,6 @@ export default function Timeline() {
             console.log('Drop target name: Timeline');
             handleDrop(item);
             console.log("updated");
-            forceUpdate();
             return { name: 'Timeline' };
         },
         collect: (monitor) => ({
@@ -103,7 +107,6 @@ export default function Timeline() {
         console.log('Video name: ' +_item.name);
         if (clip) {
             addToTimeline(clip); // we add it to the list of timeline clips, the useeffect will generate a thumbnail for this clip, we just have to fetch it
-            forceUpdate();
         } else {
             console.log('Clip not found in the clip list');
             console.log(updatedClipList)
@@ -123,9 +126,20 @@ export default function Timeline() {
                 <IconButton color="primary" sx={{ }}><PlayCircleIcon/></IconButton>
                 <IconButton color="primary" sx={{}}><FastForwardIcon/></IconButton>
            </div>
-           
         </div>
-        <div style={{width: "100%", borderBottom: "1px solid black", height:"10%"}}>timestamps (work in progress)</div>
+        <div style={{ width: "90%", borderBottom: "1px solid black", height: "10%", display: "flex", justifyContent: "space-between", alignItems: "center", justifyItems:"left", paddingLeft:"3vh"}}>
+  {Array.from({ length: intervalCount+1}, (_, i) => {
+    const timeInSeconds = Math.floor(intervalTimeDelta * (i)); 
+    const minutes = Math.floor(timeInSeconds / 60); 
+    const seconds = timeInSeconds % 60; 
+    return (
+      <div key={i}>
+        {`${minutes}:${seconds.toString().padStart(2, '0')}`}
+      </div>
+    );
+  })}
+</div>
+
     <div style={{display: "flex", flexDirection: "row", width: "100%", height: "100%"}}>
         <div style={{display: "flex", flexDirection:'column', height: "80%", justifyItems: "center", justifyContent: "space-between"}}>
             <div style={{ flex: 1, display: "flex", alignItems: "center",borderRight: "1px solid black", borderBottom: "0px solid black"}}>
@@ -137,7 +151,7 @@ export default function Timeline() {
                 <VolumeUpIcon style={{ fontSize: "3vh" }} />  
             </div>
         </div>
-        <div ref={drop} style={{display: "flex", flexDirection: "column", width: "100%", height: "80%"}}> 
+        <div ref={drop} style={{display: "flex", flexDirection: "column", width: "50%", height: "80%"}}> 
                 <div style={{width: "100%", borderBottom: "1px solid black", flex: 1}}></div> 
                 <div style={{width: "100%", borderBottom: "1px solid black", flex: 1}}>
                 {thumbnailList.map((thumbnail, index) => ( //issue 
