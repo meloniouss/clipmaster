@@ -13,10 +13,9 @@ import { ItemTypes } from './ItemTypes'
 import { useStore } from "./zustandStore";
 import { useEffect, useState } from "react";
 export default function Timeline() {
-    // timeline/time scale
-    // we can make the time stamps be dynamic based non video lengths
-    // mayhbe use icon for timeline things
-    //to-do today -> drag and drop onto the video div
+    // to do -> re-work how thumbnails match up with their video names
+    // there seem to be some glitches when you add the same video 3+ times for some reason
+    // maybe don't allow imports if a video already exists? for performance reasons (less to store in browser memory)
     interface DragItem {
         name: string;
     }
@@ -127,18 +126,18 @@ export default function Timeline() {
                 <IconButton color="primary" sx={{}}><FastForwardIcon/></IconButton>
            </div>
         </div>
-        <div style={{ width: "90%", borderBottom: "1px solid black", height: "10%", display: "flex", justifyContent: "space-between", alignItems: "center", justifyItems:"left", paddingLeft:"3vh"}}>
-  {Array.from({ length: intervalCount+1}, (_, i) => {
-    const timeInSeconds = Math.floor(intervalTimeDelta * (i)); 
-    const minutes = Math.floor(timeInSeconds / 60); 
-    const seconds = timeInSeconds % 60; 
-    return (
-      <div key={i}>
-        {`${minutes}:${seconds.toString().padStart(2, '0')}`}
-      </div>
-    );
-  })}
-</div>
+        <div style={{ width: "100%", borderBottom: "1px solid black", height: "10%", display: "flex", justifyContent: "space-between", alignItems: "center", justifyItems:"left", paddingLeft:"3vh"}}>
+          {Array.from({ length: intervalCount+2}, (_, i) => {
+            const timeInSeconds = Math.floor(intervalTimeDelta * (i)); 
+            const minutes = Math.floor(timeInSeconds / 60); 
+            const seconds = timeInSeconds % 60; 
+            return (
+              <div key={i}>
+                {`${minutes}:${seconds.toString().padStart(2, '0')}`}
+              </div>
+            );
+          })}
+          </div>
 
     <div style={{display: "flex", flexDirection: "row", width: "100%", height: "100%"}}>
         <div style={{display: "flex", flexDirection:'column', height: "80%", justifyItems: "center", justifyContent: "space-between"}}>
@@ -151,7 +150,7 @@ export default function Timeline() {
                 <VolumeUpIcon style={{ fontSize: "3vh" }} />  
             </div>
         </div>
-        <div ref={drop} style={{display: "flex", flexDirection: "column", width: "50%", height: "80%"}}> 
+        <div ref={drop} style={{display: "flex", flexDirection: "column", width: "100%", height: "80%"}}> 
                 <div style={{width: "100%", borderBottom: "1px solid black", flex: 1}}></div> 
                 <div style={{width: "100%", borderBottom: "1px solid black", flex: 1}}>
                 {thumbnailList.map((thumbnail, index) => ( //issue 
